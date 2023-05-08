@@ -1,6 +1,6 @@
 import java.io.Serializable;
 
-public class Usuario implements Serializable{
+public class Usuario implements Serializable {
     private String nombre;
     private String dni;
     private String nTrabajador;
@@ -46,5 +46,13 @@ public class Usuario implements Serializable{
 
     public void setContraseña(String contraseña) {
         this.contraseña = contraseña;
+    }
+
+    @Override
+    public String toString() {
+        return nombre + "$" +
+                dni + "$" +
+                nTrabajador + "$" +
+                contraseña + "$";
     }
 }

@@ -57,13 +57,15 @@ public class HiloServidor extends Thread {
 
                 if (texto.equalsIgnoreCase("n")) {
 
-                    Usuario usu = (Usuario) ois.readObject();
-                    insertarUsuario(usu);
+                    String m =  fun.descifrarRecibirMensajeUsuario(ois.readObject(),privada);
+                    String[] result = m.split("\\$");
+                    Usuario usu = new Usuario(result[0], result[1], result[2], result[3]);
+                    usuarios.add(usu);
+                    fun.escribirEnArchivoBinario(usuarios,"listadoCamareros.dat");
                     textoServer = "Usuario añadido a la base de datos";
                     oos.writeObject(textoServer);
-                    texto = fun.descifrarRecibirMensaje((byte[]) ois.readObject(), privada);
-                }
 
+                }
             } while (!texto.equalsIgnoreCase("y"));
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);

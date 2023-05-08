@@ -81,6 +81,7 @@ public class Cliente {
                 contraseña = sc.nextLine().getBytes();
                 oos.writeObject(fun.cifrarMensajeUsuario(new Usuario(nombre, dni, nTrabajador, fun.hasearContraseña(contraseña)), clave));
                 //oos.writeObject(new Usuario(nombre, dni, nTrabajador, fun.hasearContraseña(contraseña)));
+                System.out.println(ois.readObject());
             }
         } while (!mensaje.equalsIgnoreCase("y"));
     }

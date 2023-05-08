@@ -40,8 +40,23 @@ public class Funciones {
 
         return mDescifrado;
     }
+    public String descifrarRecibirMensajeUsuario(Object usu, PrivateKey privada) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
 
-    public  String hasearContraseña(byte[] mensaje) throws NoSuchAlgorithmException {
+        //Descibramos el mensjae que acabamos de recibir
+        System.out.println("Mensaje cifrado recibido es: " + new String(String.valueOf(usu)));
+
+        Cipher deschiper = Cipher.getInstance("RSA");
+        deschiper.init(Cipher.DECRYPT_MODE, privada);
+
+        String mDescifrado = new String(deschiper.doFinal((byte[]) usu));
+
+        System.out.println("Mensaje descifrado con clave privada " + mDescifrado);
+
+
+        return mDescifrado;
+    }
+
+    public String hasearContraseña(byte[] mensaje) throws NoSuchAlgorithmException {
         byte[] resumen = null;
         MessageDigest alg = MessageDigest.getInstance("SHA-256");
         alg.reset();
@@ -50,14 +65,29 @@ public class Funciones {
         return aHexadecimal(resumen);
     }
 
-    public  String aHexadecimal(byte[] mensaje){
-        StringBuilder sb = new StringBuilder(mensaje.length*2);
-        try(Formatter formatter = new Formatter(sb)){
-            for(byte b : mensaje){
-                formatter.format("%02x",b);
+    public String aHexadecimal(byte[] mensaje) {
+        StringBuilder sb = new StringBuilder(mensaje.length * 2);
+        try (Formatter formatter = new Formatter(sb)) {
+            for (byte b : mensaje) {
+                formatter.format("%02x", b);
             }
         }
         return sb.toString();
+    }
+
+    public void cargarArchivoBinario(ArrayList<Usuario> listaUsuarios) throws NoSuchAlgorithmException {
+        Usuario u1 = new Usuario("raul", "12345678R", "rg123", hasearContraseña("12345".getBytes()));
+        Usuario u2 = new Usuario("pepe", "87456321E", "pp123", hasearContraseña("12345".getBytes()));
+        listaUsuarios.add(u1);
+        listaUsuarios.add(u2);
+
+        try (FileOutputStream fileOutputStream = new FileOutputStream("listadoCamareros.dat");
+             ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream)) {
+            objectOutputStream.writeObject(listaUsuarios);
+        } catch (IOException ex) {
+            System.out.println("Error al escribir en el archivo: " + ex.getMessage());
+        }
+
     }
 
     public void escribirEnArchivoBinario(ArrayList<Usuario> listaUsuarios, String nombreArchivo) {
@@ -66,7 +96,7 @@ public class Funciones {
             objectOutputStream.writeObject(listaUsuarios);
         } catch (IOException ex) {
             System.out.println("Error al escribir en el archivo: " + ex.getMessage());
-}
+        }
     }
 
     public ArrayList<Usuario> leerArchivoBinario(String nombreArchivo) {
