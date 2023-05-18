@@ -29,7 +29,7 @@ public class HiloServidor extends Thread {
         fun = new Funciones();
         String textoServer = "", texto = "", usuario = "";
         int menu = 0;
-        boolean enAplicacion = false, datosCorrectos = false;
+        boolean login, datosCorrectos = false;
         byte[] contraseña;
 
         try {
@@ -57,16 +57,56 @@ public class HiloServidor extends Thread {
 
                 if (texto.equalsIgnoreCase("n")) {
 
-                    String m =  fun.descifrarRecibirMensajeUsuario(ois.readObject(),privada);
+                    String m = fun.descifrarRecibirMensajeUsuario(ois.readObject(), privada);
                     String[] result = m.split("\\$");
                     Usuario usu = new Usuario(result[0], result[1], result[2], result[3]);
                     usuarios.add(usu);
-                    fun.escribirEnArchivoBinario(usuarios,"listadoCamareros.dat");
+                    fun.escribirEnArchivoBinario(usuarios, "listadoCamareros.dat");
                     textoServer = "Usuario añadido a la base de datos";
                     oos.writeObject(textoServer);
-
                 }
             } while (!texto.equalsIgnoreCase("y"));
+            do {
+                String nombre = fun.descifrarRecibirMensaje((byte[]) ois.readObject(), privada);
+                String contraseñaLogin = fun.descifrarRecibirMensaje((byte[]) ois.readObject(), privada);
+                if (!fun.comprobarUsuario(nombre, contraseñaLogin)) {
+                    login = false;
+                    oos.writeBoolean(false);
+                    textoServer = "Usuario o contraseña incorrectos";
+                    oos.writeObject(textoServer);
+                } else {
+                    login = true;
+                    oos.writeBoolean(true);
+                    textoServer = "Usuario correcto";
+                    oos.writeObject(textoServer);
+                }
+            } while (!login);
+            do {
+                oos.writeObject(fun.menuPrincipal());
+                menu = Integer.parseInt(fun.descifrarRecibirMensaje((byte[]) ois.readObject(), privada));
+                switch (menu) {
+                    case 1:
+                        textoServer = "Espaguetti boloñesa";
+                        oos.writeObject(textoServer);
+                        break;
+                    case 2:
+                        textoServer = "Ensalada";
+                        oos.writeObject(textoServer);
+                        break;
+                    case 3:
+                        textoServer = "Chuleta";
+                        oos.writeObject(textoServer);
+                        break;
+                    case 4:
+                        textoServer = "Chuletillas";
+                        oos.writeObject(textoServer);
+                        break;
+                    case 5:
+                        textoServer = "Gracias por usar nuestro programa";
+                        oos.writeObject(textoServer);
+                        break;
+                }
+            } while (menu != 5);
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
@@ -84,13 +124,13 @@ public class HiloServidor extends Thread {
         }
     }
 
-    public void insertarUsuario(Usuario usu)  {
+    public void insertarUsuario(Usuario usu) {
         usuarios.add(usu);
 
     }
 
-    public void cargarArrayUsu(ArrayList<Usuario> usuarios){
-        Usuario usu = new Usuario("raul","AS123","1234567A","12345a");
+    public void cargarArrayUsu(ArrayList<Usuario> usuarios) {
+        Usuario usu = new Usuario("raul", "AS123", "1234567A", "12345a");
         usuarios.add(usu);
 
     }

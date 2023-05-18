@@ -24,10 +24,10 @@ public class Cliente {
         s = new Socket("localhost", puerto);
         Scanner sc = new Scanner(System.in);
         fun = new Funciones();
-        String mensaje = "", nTrabajador = "", nombre = "", dni = "";
+        String mensaje = "", nTrabajador = "", nombre = "", dni = "", usuario = "", contraseñaLogin = "";
         int menu = 0;
         byte[] contraseña;
-        boolean datosCorrectos = false, enAplicacion = true;
+        boolean datosCorrectos = false, login = true;
 
 
         //Se crean los flujos
@@ -75,14 +75,38 @@ public class Cliente {
                         datosCorrectos = false;
                     }
                 }
-
                 //Pedimos contraseña
                 System.out.println("Introduce tu contraseña");
                 contraseña = sc.nextLine().getBytes();
                 oos.writeObject(fun.cifrarMensajeUsuario(new Usuario(nombre, dni, nTrabajador, fun.hasearContraseña(contraseña)), clave));
-                //oos.writeObject(new Usuario(nombre, dni, nTrabajador, fun.hasearContraseña(contraseña)));
+
                 System.out.println(ois.readObject());
             }
         } while (!mensaje.equalsIgnoreCase("y"));
+        do {
+            System.out.println("Introduce el nombre de usuario");
+            usuario = sc.nextLine();
+            oos.writeObject(fun.cifrarMensaje(usuario, clave));
+            System.out.println("Introduce el contraseña ");
+            contraseñaLogin = sc.nextLine();
+            oos.writeObject(fun.cifrarMensaje(contraseñaLogin, clave));
+
+            login = ois.readBoolean();
+            if (!login) {
+                System.out.println(ois.readObject());
+            }else{
+                System.out.println(ois.readObject());
+            }
+        } while (!login);
+        do {
+            System.out.println(ois.readObject());
+            try {
+                menu = Integer.parseInt(sc.nextLine());
+            } catch (Exception e) {
+                System.out.println("La seleccion debe ser numerica");
+            }
+            oos.writeObject(fun.cifrarMensaje(String.valueOf(menu), clave));
+            System.out.println(ois.readObject());
+        } while (menu != 5);
     }
 }

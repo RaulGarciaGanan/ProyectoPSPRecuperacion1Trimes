@@ -110,6 +110,18 @@ public class Funciones {
         return listaUsuarios;
     }
 
+    public boolean comprobarUsuario(String usuario, String contraseña) throws NoSuchAlgorithmException {
+        ArrayList<Usuario> lUsu = new ArrayList<>();
+        lUsu = leerArchivoBinario("listadoCamareros.dat");
+        for (int x = 0; x < lUsu.size(); x++) {
+            String c = hasearContraseña(contraseña.getBytes());
+            if (lUsu.get(x).getNombre().equalsIgnoreCase(usuario) && c.equalsIgnoreCase(lUsu.get(x).getContraseña())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public String menuPrincipal() {
         String menu = new String("Bienvenido al restaurante, que plato desea elegir: \n" +
                 "1. Espaguetti boloñesa \n" +
