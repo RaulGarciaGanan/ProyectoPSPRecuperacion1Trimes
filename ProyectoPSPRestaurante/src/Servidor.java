@@ -17,9 +17,6 @@ public class Servidor {
         //fun.cargarArchivoBinario(usuarios);
         usuarios =  fun.leerArchivoBinario("listadoCamareros.dat");
 
-        for (int x = 0 ; x< usuarios.size(); x++){
-            System.out.println(usuarios.get(x).getNombre());
-        }
 
         try {
             s= new ServerSocket(puerto);
@@ -31,11 +28,12 @@ public class Servidor {
             try {
                 c = s.accept();
             } catch (IOException e) {
-                System.out.println("Error en la creacion del servidor");
+                System.out.println("Error en la conexion del servidor");
                 throw new RuntimeException(e);
             }
             HiloServidor hilo = new HiloServidor(usuarios,c);
             hilo.start();
+
         }
     }
 }

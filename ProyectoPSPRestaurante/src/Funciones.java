@@ -29,28 +29,23 @@ public class Funciones {
     public String descifrarRecibirMensaje(byte[] mensaje, PrivateKey privada) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
 
         //Descibramos el mensjae que acabamos de recibir
-        System.out.println("Mensaje cifrado recibido es: " + new String(mensaje));
-
         Cipher deschiper = Cipher.getInstance("RSA");
         deschiper.init(Cipher.DECRYPT_MODE, privada);
 
         String mDescifrado = new String(deschiper.doFinal(mensaje));
 
-        System.out.println("Mensaje descifrado con clave privada " + mDescifrado);
+
 
         return mDescifrado;
     }
     public String descifrarRecibirMensajeUsuario(Object usu, PrivateKey privada) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
 
         //Descibramos el mensjae que acabamos de recibir
-        System.out.println("Mensaje cifrado recibido es: " + new String(String.valueOf(usu)));
-
         Cipher deschiper = Cipher.getInstance("RSA");
         deschiper.init(Cipher.DECRYPT_MODE, privada);
 
         String mDescifrado = new String(deschiper.doFinal((byte[]) usu));
 
-        System.out.println("Mensaje descifrado con clave privada " + mDescifrado);
 
 
         return mDescifrado;

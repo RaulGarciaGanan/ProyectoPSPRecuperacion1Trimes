@@ -7,6 +7,7 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Scanner;
 import java.util.regex.Matcher;
@@ -24,24 +25,24 @@ public class Cliente {
         s = new Socket("localhost", puerto);
         Scanner sc = new Scanner(System.in);
         fun = new Funciones();
-        String mensaje = "", nTrabajador = "", nombre = "", dni = "", usuario = "", contraseñaLogin = "";
+        String mensaje = "", nTrabajador = "", nombre = "", dni = "", usuario = "", contraseñaLogin = "", contraseña;
         int menu = 0;
-        byte[] contraseña;
+        byte[] contraseñaBytes = new byte[0];
         boolean datosCorrectos = false, login = true;
 
 
         //Se crean los flujos
         oos = new ObjectOutputStream(s.getOutputStream());
         ois = new ObjectInputStream(s.getInputStream());
-        System.out.println("Leemos la clave");
+
 
         //Obtenemos la clave publica
-        PublicKey clave = (PublicKey) ois.readObject();
-        System.out.println("Clave recibida: " + clave);
+        PublicKey publica = (PublicKey) ois.readObject();
+        PrivateKey privada = (PrivateKey) ois.readObject();
         do {
             System.out.println(ois.readObject());
             mensaje = sc.nextLine();
-            oos.writeObject(fun.cifrarMensaje(mensaje, clave));
+            oos.writeObject(fun.cifrarMensaje(mensaje, publica));
             if (mensaje.equalsIgnoreCase("n")) {
                 //Pedimos nombre
                 System.out.println("Introduce tu nombre");
@@ -71,25 +72,40 @@ public class Cliente {
                     if (matcher.matches()) {
                         datosCorrectos = true;
                     } else {
-                        System.out.println("El dni debe estar escrito de forma correcta");
+                        System.out.println("El dni debe estar escrito de forma con 8 numeros y una letra");
                         datosCorrectos = false;
                     }
                 }
+                datosCorrectos = false;
                 //Pedimos contraseña
-                System.out.println("Introduce tu contraseña");
-                contraseña = sc.nextLine().getBytes();
-                oos.writeObject(fun.cifrarMensajeUsuario(new Usuario(nombre, dni, nTrabajador, fun.hasearContraseña(contraseña)), clave));
+                while (!datosCorrectos) {
+                    System.out.println("Introduce tu contraseña");
+                    contraseña = sc.nextLine();
+                    String regex = "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{4,8}$";
+                    Pattern patron = Pattern.compile(regex);
+                    Matcher matcher = patron.matcher(contraseña);
+                    if (matcher.matches()) {
+                        datosCorrectos = true;
+                        contraseñaBytes = contraseña.getBytes();
+                    } else {
+                        System.out.println("La contraseña debe tener 4 caracteres como minimo y 8 como maximo, y tiene que contener numero, letra mayuscula y  minuscula");
+                        datosCorrectos = false;
+                    }
+                }
+                oos.writeObject(fun.cifrarMensajeUsuario(new Usuario(nombre, dni, nTrabajador, fun.hasearContraseña(contraseñaBytes)), publica));
 
                 System.out.println(ois.readObject());
+            } else{
+                System.out.println("Debe introducir \"y\" para continuar a la aplicacion  o \"n\" para registrarse");
             }
         } while (!mensaje.equalsIgnoreCase("y"));
         do {
             System.out.println("Introduce el nombre de usuario");
             usuario = sc.nextLine();
-            oos.writeObject(fun.cifrarMensaje(usuario, clave));
+            oos.writeObject(fun.cifrarMensaje(usuario, publica));
             System.out.println("Introduce el contraseña ");
             contraseñaLogin = sc.nextLine();
-            oos.writeObject(fun.cifrarMensaje(contraseñaLogin, clave));
+            oos.writeObject(fun.cifrarMensaje(contraseñaLogin, publica));
 
             login = ois.readBoolean();
             if (!login) {
@@ -105,8 +121,8 @@ public class Cliente {
             } catch (Exception e) {
                 System.out.println("La seleccion debe ser numerica");
             }
-            oos.writeObject(fun.cifrarMensaje(String.valueOf(menu), clave));
-            System.out.println(ois.readObject());
+            oos.writeObject(fun.cifrarMensaje(String.valueOf(menu), publica));
+            System.out.println(fun.descifrarRecibirMensaje((byte[]) ois.readObject(), privada));
         } while (menu != 5);
     }
 }

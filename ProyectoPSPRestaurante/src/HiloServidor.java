@@ -29,8 +29,7 @@ public class HiloServidor extends Thread {
         fun = new Funciones();
         String textoServer = "", texto = "", usuario = "";
         int menu = 0;
-        boolean login, datosCorrectos = false;
-        byte[] contraseña;
+        boolean login;
 
         try {
             //Generamos la clave
@@ -38,7 +37,7 @@ public class HiloServidor extends Thread {
 
             keygen = KeyPairGenerator.getInstance("RSA");
 
-            System.out.println("Generando claves");
+            System.out.println("Conexion extablecida");
             par = keygen.generateKeyPair();
             privada = par.getPrivate();
             publica = par.getPublic();
@@ -48,7 +47,7 @@ public class HiloServidor extends Thread {
             ObjectInputStream ois = new ObjectInputStream(c.getInputStream());
 
             oos.writeObject(publica);
-            System.out.println("Clave publica: " + publica);
+            oos.writeObject(privada);
             do {
                 textoServer = "Tiene cuenta?, en lo contrario se le redireccionara a la pagina de registro(Y/N)";
                 oos.writeObject(textoServer);
@@ -56,13 +55,13 @@ public class HiloServidor extends Thread {
                 texto = fun.descifrarRecibirMensaje((byte[]) ois.readObject(), privada);
 
                 if (texto.equalsIgnoreCase("n")) {
-
                     String m = fun.descifrarRecibirMensajeUsuario(ois.readObject(), privada);
                     String[] result = m.split("\\$");
                     Usuario usu = new Usuario(result[0], result[1], result[2], result[3]);
                     usuarios.add(usu);
                     fun.escribirEnArchivoBinario(usuarios, "listadoCamareros.dat");
                     textoServer = "Usuario añadido a la base de datos";
+                    System.out.println("Usuario añadido a la base de datos");
                     oos.writeObject(textoServer);
                 }
             } while (!texto.equalsIgnoreCase("y"));
@@ -86,24 +85,34 @@ public class HiloServidor extends Thread {
                 menu = Integer.parseInt(fun.descifrarRecibirMensaje((byte[]) ois.readObject(), privada));
                 switch (menu) {
                     case 1:
-                        textoServer = "Espaguetti boloñesa";
-                        oos.writeObject(textoServer);
+                        textoServer = "Ya puede recoger su pedido: espaguetti boloñesa";
+                        sleep(1000);
+                        oos.writeObject(fun.cifrarMensaje(textoServer, publica));
                         break;
                     case 2:
-                        textoServer = "Ensalada";
-                        oos.writeObject(textoServer);
+                        textoServer = "Ya puede recoger su pedido: ensalada";
+                        sleep(200);
+                        oos.writeObject(fun.cifrarMensaje(textoServer, publica));
+
                         break;
                     case 3:
-                        textoServer = "Chuleta";
-                        oos.writeObject(textoServer);
+                        textoServer = "Ya puede recoger su pedido: chuleta";
+                        sleep(1000);
+                        oos.writeObject(fun.cifrarMensaje(textoServer, publica));
                         break;
                     case 4:
-                        textoServer = "Chuletillas";
-                        oos.writeObject(textoServer);
+                        textoServer = "Ya puede recoger su pedido: chuletillas";
+                        sleep(800);
+                        oos.writeObject(fun.cifrarMensaje(textoServer, publica));
                         break;
                     case 5:
                         textoServer = "Gracias por usar nuestro programa";
-                        oos.writeObject(textoServer);
+                        oos.writeObject(fun.cifrarMensaje(textoServer, publica));
+                        break;
+                    default:
+                        textoServer = "Debe seleccionar un numero de los que aparecen en el menu";
+                        oos.writeObject(fun.cifrarMensaje(textoServer, publica));
+                        ;
                         break;
                 }
             } while (menu != 5);
@@ -121,17 +130,9 @@ public class HiloServidor extends Thread {
             throw new RuntimeException(e);
         } catch (InvalidKeyException e) {
             throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    public void insertarUsuario(Usuario usu) {
-        usuarios.add(usu);
-
-    }
-
-    public void cargarArrayUsu(ArrayList<Usuario> usuarios) {
-        Usuario usu = new Usuario("raul", "AS123", "1234567A", "12345a");
-        usuarios.add(usu);
-
-    }
 }
